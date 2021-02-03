@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load static %}
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,14 +16,22 @@
     {% block navbar %}
     <nav class="navbar navbar-expand-lg d-flex justify-content-between">
         <a class="navbar-brand text-dark" href="{% url 'blog:posts' %}">Blog</a>
-        {% if request.user %}<div><a class="mx-3" href="{% url 'blog:create' %}">Create Post</a><a class="mx-3" href="{% url 'users:logout' %}">Logout</a></div>{% else %}<div><a class="mx-3" href="{% url 'users:signup' %}">Sign Up</a><a class="btn btn-link btn-primary mx-3" href="{% url 'users:login' %}">Login</a></div>{% endif %}
+        {% if request.user|lower != 'anonymoususer' %}
+        <div>
+            <a class="mx-3" href="{% url 'blog:create' %}">Create Post</a><a class="mx-3"
+                href="{% url 'users:logout' %}">Logout</a></div>
+                {% else %}
+        <div><a class="btn btn-link btn-primary text-light mx-3"
+                href="{% url 'users:signup' %}">Sign Up</a><a class="mx-3"
+                href="{% url 'users:login' %}">Login</a></div>{% endif %}
     </nav>
     {% endblock %}
     <div role="main" class="container mt-5">
         {% block content %}{% endblock %}
     </div>
     {% block footer %}
-    <footer id="footer" class="footer border-top text-dark mt-5 text-center footer-stick-bottom" style="width: 100%;line-height: 50px;">
+    <footer id="footer" class="footer border-top text-dark mt-5 text-center footer-stick-bottom"
+        style="width: 100%;line-height: 50px;">
         <div class="container">
             <span>Open Source blog template free to use.</span>
         </div>
@@ -34,7 +43,7 @@
         }
     </style>
     <script>
-        function check_footer_status () {
+        function check_footer_status() {
             if (document.getElementById('body').clientHeight + document.getElementById('footer').clientHeight > window.innerHeight) {
                 $('#footer').removeClass('footer-stick-bottom')
             } else {
@@ -44,7 +53,9 @@
         }
         window.onresize = check_footer_status
 
-        check_footer_status()
+        window.onload = function() {
+            check_footer_status()
+        }
     </script>
     {% endblock %}
     {% block extra_script %}

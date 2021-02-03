@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <title>Document</title>
+</head>
+
+<body id="body">
+    {% block navbar %}
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand text-dark" href="#">Blog</a>
+    </nav>
+    {% endblock %}
+    <div role="main" class="container mt-5" dir="">
+        {% block content %}{% endblock %}
+    </div>
+    {% block footer %}
+    <footer id="footer" class="footer border-top text-dark mt-5 text-center footer-stick-bottom" style="width: 100%;line-height: 50px;">
+        <div class="container">
+            <span>Open Source blog template free to use.</span>
+        </div>
+    </footer>
+    <style>
+        .footer-stick-bottom {
+            position: absolute;
+            bottom: 0;
+        }
+    </style>
+    <script>
+        function check_footer_status () {
+            if (document.getElementById('body').clientHeight + document.getElementById('footer').clientHeight > window.innerHeight) {
+                $('#footer').removeClass('footer-stick-bottom')
+            } else {
+                $('#footer').addClass('footer-stick-bottom')
+            }
+            console.log(window.innerHeight, document.getElementById('body').clientHeight)
+        }
+        window.onresize = check_footer_status
+
+        check_footer_status()
+    </script>
+    {% endblock %}
+    {% block extra_script %}
+    {% endblock %}
+</body>
+
+</html>

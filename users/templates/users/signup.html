@@ -1,0 +1,10 @@
+{% extends 'users/base.html' %}
+{% block navbar %}{% endblock %}
+{% block content %}
+{% load bootstrap_tags %}
+<form method="post">
+    {% csrf_token %}
+    {{ form|as_bootstrap }}
+    <input class="btn btn-primary" type="submit" value="Sign Up">
+</form>
+{% endblock %}

@@ -1,22 +1,54 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+from django.core.files.storage import FileSystemStorage
 
+fs = FileSystemStorage(location='media/img')
 
 class Post(models.Model):
     text = models.CharField('Text', max_length=9000)
-    img = models.CharField('Image', max_length=100)
+    img = models.ImageField(storage=fs)
     create_date = models.DateField('Date')
     title = models.CharField('Title', max_length=100)
-    user_id = models.ForeignKey(User)
-    tag_id = models.ForeignKey('Tag')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    tag = models.ForeignKey('Tag', on_delete=models.CASCADE, null=True, blank=True)
+    disabled = models.BooleanField(default=False)
+    approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
 
 
 class Tag(models.Model):
     name = models.CharField(max_length=100)
-    parent = models.ForeignKey(Tag)
+    parent = models.ForeignKey('Tag', on_delete=models.CASCADE, blank=True, null=True)
+
+    def clean(self):
+        if self.parent:
+            if self.parent.pk == self.pk:
+                raise ValidationError(_('parent can not be as same as this foreign key'))
+
+    def __str__(self):
+        return f'{str(self.parent) + " > " if self.parent else ""}{self.name}'
 
 class Comment(models.Model):
     text = models.CharField('Text', max_length=9000)
     create_date = models.DateField('Date')
-    user_id = models.ForeignKey(User)
-    post_id = models.ForeignKey(Post)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    disabled = models.BooleanField(default=False)
+    approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.text
+
+class CommentLike(models.Model):
+    like = models.BooleanField()
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class PostLike(models.Model):
+    like = models.BooleanField()
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True)

@@ -1,1 +1,7 @@
 local_config.py
+.vscode
+__pycache__
+venv
+static/img
+media
+*.pyc

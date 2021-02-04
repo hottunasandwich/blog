@@ -18,6 +18,7 @@
         <a class="navbar-brand text-dark" href="{% url 'blog:posts' %}">Blog</a>
         {% if request.user|lower != 'anonymoususer' %}
         <div>
+            <span class="mx-3">{{request.user}}</span>
             <a class="mx-3" href="{% url 'blog:create' %}">Create Post</a><a class="mx-3"
                 href="{% url 'users:logout' %}">Logout</a></div>
                 {% else %}

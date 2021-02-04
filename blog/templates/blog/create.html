@@ -6,4 +6,63 @@
     {{ form|as_bootstrap }}
     <input type="submit" class="btn btn-primary" value="Create Post">
 </form>
+<fieldset id="preview" class="border rounded p-4 scheduler-border my-5">
+    <legend class="scheduler-border">Preview</legend>
+    <div class="control-group">
+        <div class="h1" id="preview-title" style="font-family: 'Times New Roman', Times, serif;">
+        </div>
+        <div class="d-flex justify-content-between">
+            <span id="author">
+                <span>author: </span><span class="font-italic text-muted">{{ request.user }}</span>
+            </span>
+            <div> {% now 'M d Y' %}</div>
+        </div>
+        <img id="preview-img" width="100%" />
+        <div id="preview-text" style="font-size: 20px;">
+            {{ post.text }}
+        </div>
+    </div>
+</fieldset>
+<style>
+    legend.scheduler-border {
+    width:inherit; /* Or auto */
+    padding:0 10px; /* To give a bit of padding on the left and right */
+    border-bottom:none;
+}
+</style>
+{% endblock %}
+{% block extra_script %}
+<script>
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#preview-img').attr('src', e.target.result);
+
+                setTimeout(function () {
+                    check_footer_status()
+                }, 1);
+            }
+
+            reader.readAsDataURL(input.files[0]); // convert to base64 string
+        }
+    }
+    function changeTitle(input) {
+        $('#preview-title').text(input.value)
+    }
+    function changeText(input) {
+        $('#preview-text').text(input.value)
+    }
+
+    $("#id_img").change(function () {
+        readURL(this);
+    });
+    $('#id_title').keyup(function () {
+        changeTitle(this)
+    })
+    $('#id_text').keyup(function () {
+        changeText(this)
+    })
+</script>
 {% endblock %}

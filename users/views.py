@@ -26,4 +26,4 @@ def login_view(request):
 def logout_view(request):
     if request.user and request.method == 'GET':
         logout(request)
-        return redirect(reverse('users:login'))
+        return redirect(reverse('blog:posts'))

@@ -1,0 +1,16 @@
+<span class="dropdown rounded dropleft">
+    <button class="bg-light border-0 dropdown-toggle btn-lg" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false">
+        <span>{{request.user}}</span>
+        <i class="bi-person-fill"></i>
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="{% url 'users:profile' request.user.pk %}">Profile</a>
+        <a class="dropdown-item" href="{% url 'users:logout' %}">Logout</a>
+    </div>
+</span>
+<style>
+    #dropdownMenuButton::before{
+        content: none !important;
+    }
+</style>

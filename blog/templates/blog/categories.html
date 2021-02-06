@@ -1,0 +1,13 @@
+<div id="categories" class="rounded border pl-3">
+    <div class="h4 pt-3 title-font-regular">Categories</div>
+    <div class="pl-5">
+        {% for cat, cat_list in categories.items %}
+        <a href="{% url 'blog:category' cat %}" class="text-dark">{{cat}}</a>
+        <ul style="list-style: none;">
+            {% for item in cat_list %}
+            <li><a href="{% url 'blog:category' item %}" class="text-secondary">{{ item }}</a></li>
+            {% endfor %}
+        </ul>
+        {% endfor %}
+    </div>
+</div>

@@ -1,34 +1,43 @@
 {% extends 'blog/index.html' %}
+{% block title %}Create Post{% endblock %}
 {% block content %}
-<form action="" method="POST" enctype="multipart/form-data">
-    {% load bootstrap_tags %}
-    {% csrf_token %}
-    {{ form|as_bootstrap }}
-    <input type="submit" class="btn btn-primary" value="Create Post">
-</form>
-<fieldset id="preview" class="border rounded p-4 scheduler-border my-5">
-    <legend class="scheduler-border">Preview</legend>
-    <div class="control-group">
-        <div class="h1" id="preview-title" style="font-family: 'Times New Roman', Times, serif;">
+<div class="container">
+    <form action="" method="POST" enctype="multipart/form-data">
+        {% load bootstrap_tags %}
+        {% csrf_token %}
+        {{ form|as_bootstrap }}
+        <input type="submit" class="btn btn-primary" value="Create Post">
+        <input id="preview-btn" type="button" class="btn btn-info" value="Preview">
+    </form>
+    <fieldset id="preview" class="border rounded p-4 scheduler-border my-5">
+        <legend class="scheduler-border">Preview</legend>
+        <div class="control-group">
+            <div class="h1" id="preview-title" style="font-family: 'Times New Roman', Times, serif;">
+            </div>
+            <div class="d-flex justify-content-between">
+                <span id="author">
+                    <span>author: </span><span class="font-italic text-muted">{{ request.user }}</span>
+                </span>
+                <div> {% now 'M d Y' %}</div>
+            </div>
+            <img id="preview-img" width="100%" />
+            <div id="preview-text" style="font-size: 20px;">
+                <p>{{ post.text }}</p>
+            </div>
         </div>
-        <div class="d-flex justify-content-between">
-            <span id="author">
-                <span>author: </span><span class="font-italic text-muted">{{ request.user }}</span>
-            </span>
-            <div> {% now 'M d Y' %}</div>
-        </div>
-        <img id="preview-img" width="100%" />
-        <div id="preview-text" style="font-size: 20px;">
-            {{ post.text }}
-        </div>
-    </div>
-</fieldset>
+    </fieldset>
+</div>
 <style>
     legend.scheduler-border {
     width:inherit; /* Or auto */
     padding:0 10px; /* To give a bit of padding on the left and right */
     border-bottom:none;
-}
+    }
+    .alert {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+    }
 </style>
 {% endblock %}
 {% block extra_script %}
@@ -63,6 +72,12 @@
     })
     $('#id_text').keyup(function () {
         changeText(this)
+    })
+    $('#preview-btn').click(function(){
+        $('#preview').fadeToggle(200)
+        setTimeout(function () {
+                    check_footer_status()
+                }, 1);
     })
 </script>
 {% endblock %}

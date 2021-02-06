@@ -10,5 +10,5 @@ urlpatterns = [
     path('<int:pk>/tag', views.TagView.as_view(), name='tag'),
     path('category/<str:pk>', views.CategroyView.as_view(), name='category'),
     path('<int:pk>/edit', views.PostUpdateView.as_view(), name='edit'),
-    path('<int:pk>/delete', views.PostDeleteView.as_view(), name='deletes')
+    path('<int:pk>/delete', views.PostDeleteView.as_view(), name='delete')
 ]

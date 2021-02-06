@@ -1,7 +1,7 @@
 from django.shortcuts import render, reverse, redirect
 from django.views import generic
 from .models import *
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import login_required
 from .forms import *
 from django.db.models import Q
@@ -43,7 +43,8 @@ class PostUpdateView(SuccessMessageMixin, generic.UpdateView):
     fields = ['title', 'text', 'img', 'tag', 'category']
     success_message = "'%(title)s' was updated successfully"
 
-class PostDeleteView(SuccessMessageMixin, generic.DeleteView):
+class PostDeleteView(PermissionRequiredMixin, SuccessMessageMixin, generic.DeleteView):
+    permission_required = ['delete_post']
     model = Post
     success_url = '/'
     success_message = "'%(title)s' was updated successfully"

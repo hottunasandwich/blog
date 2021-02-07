@@ -1,12 +1,13 @@
 {% extends 'blog/index.html' %}
 {% block title %}{{post.title}}{% endblock %}
 {% block content %}
-<div class="container">
+<div class="container shadow p-5 rounded">
     <span class="h1" style="font-family: 'Times New Roman', Times, serif;">
         {{ post.title }}
     </span>
     {% if 'blog.change_post' in perms or request.user == post.author %}
-    (<a href="{% url 'blog:edit' post.pk %}">Edit</a>-<a href="{% url 'blog:delete' post.pk %}" class="text-danger">Delete</a>)
+    (<a href="{% url 'blog:edit' post.pk %}">Edit</a>-<a href="{% url 'blog:delete' post.pk %}"
+        class="text-danger">Delete</a>)
     {% endif %}
     <div class="d-flex justify-content-between">
         <span id="author">
@@ -43,9 +44,12 @@
         </div>
         {% endfor %}
     </div>
-    <div id="add_comment">
-        <form action="" method="POST">
-        </form>
+</div>
+<div class="container mt-4 p-0">
+    {% if 'blog.add_comment' in perms %}
+    <div id="add_comment" class="rounded shadow p-5">
+        {% include 'blog/comment.html' %}
     </div>
+    {% endif %}
 </div>
 {% endblock %}

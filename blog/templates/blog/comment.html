@@ -1,0 +1,8 @@
+<div id="comment">
+    {% load bootstrap_tags %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form|as_bootstrap }}
+        <input type="submit" class="btn btn-primary" value="Leave">
+    </form>
+</div>

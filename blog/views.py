@@ -1,8 +1,8 @@
-from django.shortcuts import render, reverse, redirect
+from django.shortcuts import render, reverse, redirect, get_object_or_404
 from django.views import generic
 from .models import *
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from .forms import *
 from django.db.models import Q
 from django.contrib import messages
@@ -33,9 +33,23 @@ class PostsView(generic.ListView):
         context['tags'] = Tag.objects.all()
         return context
 
-class PostView(generic.DetailView):
-    template_name = 'blog/blog.html'
-    model = Post
+def post_view(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    user = User.objects.get(username=request.user)
+    if request.method == 'POST' and user.has_perm('blog.add_comment'):
+        new_comment_form = CommentForm(request.POST)
+
+        if new_comment_form.is_valid():
+            text = new_comment_form.cleaned_data['text']
+
+            Comment.objects.create(text=text, author=user, post=post)
+
+            messages.success(request, 'Comment added')
+
+    new_comment_form = CommentForm()
+    print(request)
+
+    return render(request, 'blog/blog.html', {'post': post, 'form': new_comment_form})
 
 class PostUpdateView(SuccessMessageMixin, generic.UpdateView):
     template_name = 'blog/edit.html'
@@ -58,7 +72,6 @@ def post_create_view(request):
         if create_form.is_valid():
             post = create_form.save(commit=False)
             post.author = User.objects.get(username=request.user)
-            post.create_date = timezone.now()
 
             post.save()
             create_form.save_m2m()

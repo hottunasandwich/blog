@@ -10,7 +10,7 @@ fs = FileSystemStorage(location='media/img')
 class Post(models.Model):
     text = models.CharField('Text', max_length=9000)
     img = models.ImageField(storage=fs)
-    create_date = models.DateField('Date')
+    create_date = models.DateField('Date', auto_now_add=True)
     title = models.CharField('Title', max_length=100)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey('Category', on_delete=models.DO_NOTHING, null=True, blank=True)
@@ -47,7 +47,7 @@ class Category(models.Model):
 
 class Comment(models.Model):
     text = models.CharField('Text', max_length=9000)
-    create_date = models.DateField('Date')
+    create_date = models.DateField('Date', auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     disabled = models.BooleanField(default=False)

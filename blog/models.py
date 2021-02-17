@@ -14,7 +14,7 @@ class Post(models.Model):
     title = models.CharField('Title', max_length=100)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey('Category', on_delete=models.DO_NOTHING, null=True, blank=True)
-    tag = models.ForeignKey('Tag', on_delete=models.DO_NOTHING, null=True, blank=True)
+    tag = models.ManyToManyField('Tag')
     disabled = models.BooleanField(default=False)
     approved = models.BooleanField(default=False)
 
@@ -23,6 +23,12 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:post', kwargs={'pk': self.pk})
+
+    def delta_time(self):
+        pass
+
+    class Meta:
+        ordering = ['-create_date']
 
 class Tag(models.Model):
     name = models.CharField(max_length=30)
@@ -34,16 +40,22 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     parent = models.ForeignKey('Category', on_delete=models.CASCADE, blank=True, null=True)
 
-    def clean(self):
+    def clean(self, *args, **kwargs):
         if self.parent:
             if self.parent.pk == self.pk:
                 raise ValidationError(_('parent can not be as same as this foreign key'))
+
+        super().clean(*args, **kwargs)
 
     def full_name(self):
         return f'{str(self.parent) + "/" if self.parent else ""}{self.name}'
 
     def __str__(self):
         return self.full_name()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 class Comment(models.Model):
     text = models.CharField('Text', max_length=9000)

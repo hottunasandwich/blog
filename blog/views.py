@@ -7,6 +7,8 @@ from .forms import *
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from users.management.commands.creategroups import Command as Perms
+from django.http import HttpResponse
 
 
 def get_category_list():
@@ -25,7 +27,10 @@ class PostsView(generic.ListView):
     context_object_name = 'posts'
 
     def get_queryset(self):
-        return Post.objects.all()
+        if self.request.user.has_perms(Perms.editor_perms):
+            return Post.objects.all()
+
+        return Post.objects.filter(disabled=False, approved=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -34,8 +39,11 @@ class PostsView(generic.ListView):
         return context
 
 def post_view(request, pk):
+    if request.user.is_authenticated:
+        user = User.objects.get(username=request.user)
+
     post = get_object_or_404(Post, pk=pk)
-    user = User.objects.get(username=request.user)
+    
     if request.method == 'POST' and user.has_perm('blog.add_comment'):
         new_comment_form = CommentForm(request.POST)
 
@@ -47,7 +55,6 @@ def post_view(request, pk):
             messages.success(request, 'Comment added')
 
     new_comment_form = CommentForm()
-    print(request)
 
     return render(request, 'blog/blog.html', {'post': post, 'form': new_comment_form})
 
@@ -89,8 +96,33 @@ class TagView(PostsView):
         super().setup(request, *args, **kwargs)
 
     def get_queryset(self):
-        return Post.objects.filter(tag=self.pk)
+        if self.request.user.has_perms(Perms.editor_perms):
+            return Post.objects.filter(tag=self.pk)
+        return Post.objects.filter(tag=self.pk, approved=True, disabled=False)
 
 class CategroyView(TagView):
     def get_queryset(self):
-        return Post.objects.filter(Q(category__name=self.pk) | Q(category__parent__name=self.pk))
+        if self.request.user.has_perms(Perms.editor_perms):
+            return Post.objects.filter(Q(category__name=self.pk) | Q(category__parent__name=self.pk))
+        return Post.objects.filter(Q(category__name=self.pk) | Q(category__parent__name=self.pk), approved=True, disabled=False)
+
+@permission_required('blog.change_post')
+def approve_post(request, pk):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, pk=pk)
+        if request.POST['action'] == 'approve':
+            post.approved = True
+            messages.success(request, f'Approved "{post}"')
+
+            return redirect(reverse('blog:notapproved'))
+
+        elif request.POST['action'] == 'enable':
+            post.disabled = not post.disabled
+            messages.success(request, f'Enabled "{post}"')
+
+        post.save()
+
+        return HttpResponse('ok')
+class NotApprovedPostsView(PostsView):
+    def get_queryset(self):
+        return Post.objects.filter(approved=False)

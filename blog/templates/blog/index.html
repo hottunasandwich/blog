@@ -5,12 +5,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{% static 'js/popper.js' %}"></script>
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <title>{% if request.user|lower != 'anonymoususer' %}{{request.user}} - {% endif %}{% block title %}{% endblock %}
+    <title>{% if request.user.is_authenticated %}{{request.user}} - {% endif %}{% block title %}{% endblock %}
     </title>
 </head>
 
@@ -26,8 +27,14 @@
     {% block navbar %}
     <nav class="navbar navbar-expand-lg d-flex justify-content-between shadow-sm">
         <a class="navbar-brand text-dark" style="font-family: title;" href="{% url 'blog:posts' %}">Blog</a>
-        {% if request.user|lower != 'anonymoususer' %}
+        {% if request.user.is_authenticated %}
         <div>
+            {% if 'blog.view_category' in perms %}
+            <a class="mx-3" href="{% url 'blog:create' %}"></a>
+            <a href="{% url 'blog:notapproved' %}" class="btn btn-primary">
+                Not Approved Posts <span class="badge bg-secondary" id="not-approved"></span>
+            </a>
+            {% endif %}
             {% if 'blog.add_post' in perms %}<a class="mx-3" href="{% url 'blog:create' %}">Create Post</a>{% endif %}
             {% include 'blog/account.html' %}
         </div>
@@ -72,6 +79,12 @@
             bottom: 10px;
             left: 10px;
         }
+        .dropdown-toggle::before{
+            content: none !important;
+        }
+        .dropdown-toggle::after{
+            content: none !important;
+        }
     </style>
     <script>
         function check_footer_status() {
@@ -92,6 +105,13 @@
                     $('.messages').fadeOut()
                 }, 6000);
             }
+            $.ajax({
+                url: '/api/post/notapproved',
+                method: 'GET',
+                success: function(data, status, xhr) {
+                    $('#not-approved').text(data.count)
+                }
+            })
         }
     </script>
     {% endblock %}

@@ -3,16 +3,18 @@
 {% block content %}
 <div>
     <div class="row" style="width: 100%;margin: 0;">
-        <div class="col-2" style="position: sticky;top: 10px;height: fit-content;">
+        <div class="col-2">
             {% include 'blog/categories.html' %}
         </div>
-        <div class="col-lg-10 col-sm-12">
-            <div>{% include 'blog/tags.html' %}</div>
+        <div class="col-lg-8 col-sm-12">
             <div class="row">
                 {% for post in posts %}
                 <div class="col-lg-4 py-3 col-sm-12">
                     <div class="post-card card shadow rounded" style="border: none;">
-                        <div id="post-cat" class="badge bg-dark text-light">{{post.category}}</div>
+                        
+                        <div id="post-cat">
+                            <div class="badge bg-dark text-light">{{post.category}}</div>
+                        </div>
                         <img class="card-img-top" src="/media/img/{{post.img}}" alt="Card image cap">
                         <div class="card-body">
                             <h5 class="card-title">{{post.title}}</h5>
@@ -24,19 +26,22 @@
                 {% endfor %}
             </div>
         </div>
+        <div class="col-lg-2">
+            <div>{% include 'blog/tags.html' %}</div>
+        </div>
     </div>
 </div>
 <style>
-    #post-cat{
+    #post-cat {
         position: absolute;
         top: 10px;
         left: 10px;
     }
 </style>
 <script>
-    $('.post-card').hover(function(event){
+    $('.post-card').hover(function (event) {
         $(this).removeClass('shadow').addClass('border')
-    }, function(event){
+    }, function (event) {
         $(this).removeClass('border').addClass('shadow')
     })
 </script>

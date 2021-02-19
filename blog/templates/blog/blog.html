@@ -22,7 +22,7 @@
         {{ post.title }}
     </span>
     <div>
-        <button id="enable" class="badge bg-{% if post.disabled %}danger{% else %}success{% endif %} text-light">{% if post.disabled %}disabled{% else %}enabled{% endif %}</button>
+        <button id="enable" class="badge border-0 shadow-sm bg-{% if post.disabled %}danger{% else %}success{% endif %} text-light">{% if post.disabled %}Disabled{% else %}Enabled{% endif %}</button>
     </div>
     {% if 'blog.change_post' in perms or request.user == post.author %}
     <span class="dropdown rounded" style="position:absolute;top:10px;right: 10px;">
@@ -47,7 +47,7 @@
     <div id="text" style="font-size: 20px;">
         <p>{{ post.text }}</p>
     </div>
-    <div class="d-flex">
+    <div class="d-flex like-box" data-id="{{ post|post_like_id:request.user }}">
         <div class="h2 text-success p-2 m-2">
             <span class="counter">{{ post.postlike_set.all|like_counter:True }}</span>
             <i id="post-like" class="bi bi-hand-thumbs-up{% if post|liked_this_post:request.user == True %}-fill{% endif %}"></i>
@@ -61,23 +61,29 @@
     <div class="h1">Comments</div>
     <div class="container border rounded py-4">
         {% for comment in post.comment_set.all %}
-        <div class="comment">
+        {% if not comment.disabled or perms.blog.view_category %}
+        <div class="comment mb-4">
             <div class="d-flex justify-content-between">
-                <div class="font-bold text-info">{{ comment.author }}</div>
+                <div class="font-bold text-info">
+                    {% if comment.disabled and perms.blog.view_category %}
+                    <i class="bi bi-dash-circle-fill text-danger"></i>
+                    {% endif %}
+                    {{ comment.author }}</div>
                 <div class="text-muted">{{ comment.create_date }}</div>
             </div>
             <div>{{ comment.text }}</div>
             <div class="d-flex">
-                <div class="h4 text-success p-2 m-2">
+                <div class="h5 text-success mr-2">
                     <span class="counter">{{ comment.commentlike_set.all|like_counter:True }}</span>
                     <i class="bi bi-hand-thumbs-up{% if comment|comment_liked:request.user == True %}-fill{% endif %} comment-like"></i>
                 </div>
-                <div class="h4 text-danger p-2 m-2">
+                <div class="h5 text-danger ml-2">
                     <i class="bi bi-hand-thumbs-down{% if comment|comment_liked:request.user == False %}-fill{% endif %} comment-dislike"></i>
                     <span class="counter">{{ comment.commentlike_set.all|like_counter:False }}</span>
                 </div>
             </div>
         </div>
+        {% endif %}
         {% endfor %}
     </div>
 </div>
@@ -91,8 +97,53 @@
 {% endblock %}
 {% block extra_script %}
 <script>
-    $('#post-like').click((ev) => {
-        var liked = ev.target
+    function CreateLike(like, id, callback) {
+        $.ajax({
+            url: '/api/post/like/',
+            method: 'POST',
+            data: {
+                user: '{{ request.user.pk }}',
+                post: '{{ post.pk }}',
+                like: like
+            },
+            success: function(data){
+                callback()
+            },
+            error: function(data){
+                console.log(data)
+            },
+            headers: {'X-CSRFToken': getCookie('csrftoken')}
+        })
+    }
+    function UpdateLike(like, id, callback){
+        $.ajax({
+            url: `/api/post/like/`+id+`/`,
+            method: 'PUT',
+            data: {
+                user: '{{ request.user.pk }}',
+                post: '{{ post.pk }}',
+                like: like
+            },
+            success: function (data) {
+                callback()
+            },
+            error: function(data){
+                console.log(data)
+            },
+            headers: {'X-CSRFToken': getCookie('csrftoken')}
+        })
+    }
+    function DeleteLike(id, callback){
+        $.ajax({
+            url: `/api/post/like/`+id+`/`,
+            method: 'DELETE',
+            success: function(data){
+                callback()
+            },
+            headers: {'X-CSRFToken': getCookie('csrftoken')}
+        })
+    }
+    function HandleLike(liked){
         if ($(liked).hasClass('bi-hand-thumbs-up-fill')) {
             $(liked).addClass('bi-hand-thumbs-up')
             $(liked).removeClass('bi-hand-thumbs-up-fill')
@@ -106,9 +157,8 @@
                 return Number(value) + 1;
             })
         }
-    })
-    $('#post-dislike').click((ev) => {
-        var liked = ev.target
+    }
+    function HandleDislike(liked){
         if ($(liked).hasClass('bi-hand-thumbs-down-fill')) {
             $(liked).addClass('bi-hand-thumbs-down')
             $(liked).removeClass('bi-hand-thumbs-down-fill')
@@ -122,6 +172,39 @@
                 return Number(value) + 1;
             })
         }
+    }
+    $('#post-like').click((ev) => {
+        var liked = ev.target
+        if ($(ev.target).hasClass('bi-hand-thumbs-up-fill')) {
+            DeleteLike($('#post-like').parent().parent('.like-box').attr('data-id'), function(){
+                HandleLike(liked)
+            })
+        } else if ($('#post-like').hasClass('bi-hand-thumbs-up-fill') || $('#post-dislike').hasClass('bi-hand-thumbs-down-fill')){
+            UpdateLike(true, $('#post-like').parent().parent('.like-box').attr('data-id'), function(){
+                HandleLike(liked)
+            })
+        } else if ($('#post-like').hasClass('bi-hand-thumbs-up') && $('#post-dislike').hasClass('bi-hand-thumbs-down')){
+            CreateLike(true, $('#post-like').parent().parent('.like-box').attr('data-id'), function(){
+                HandleLike(liked)
+            })
+        }
+    })
+    $('#post-dislike').click((ev) => {
+        var liked = ev.target
+        if ($(ev.target).hasClass('bi-hand-thumbs-down-fill')) {
+            DeleteLike($('#post-dislike').parent().parent('.like-box').attr('data-id'), function(){
+                HandleDislike(liked)
+            })
+        } else if ($('#post-like').hasClass('bi-hand-thumbs-up-fill') || $('#post-dislike').hasClass('bi-hand-thumbs-down-fill')){
+            UpdateLike(false, $('#post-dislike').parent().parent('.like-box').attr('data-id'), function(){
+                HandleDislike(liked)
+            })
+        } else if ($('#post-like').hasClass('bi-hand-thumbs-up') && $('#post-dislike').hasClass('bi-hand-thumbs-down')){
+            CreateLike(false, $('#post-dislike').parent().parent('.like-box').attr('data-id'), function(){
+                HandleDislike(liked)
+            })
+        }
+        
     })
     $('#enable').click(()=>{
         $.ajax({

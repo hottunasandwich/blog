@@ -46,40 +46,18 @@ class CommentLikeViewSet(mixins.RetrieveModelMixin, mixins.CreateModelMixin, mix
         get_object_or_404(self.queryset, pk=pk).delete()
         return Response({"status": 'ok'})
 
-class PostLikeViewSet(mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
-    """
-    """
+class PostLikeViewSet(mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = PostLike.objects.all()
     serializer_class = PostLikeSerializer
 
     # for production faze
     # renderer_classes = [JSONRenderer]
 
-    def update(self, request, pk=None):
-        post_like = get_object_or_404(self.queryset, pk=pk)
-        if post_like.user.pk == request.data['user'] and post_like.comment.pk == request.data['comment']:
-            post_like.like = request.data['like']
-            return Response({'status': 'ok'})
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
-        else:
-            return Response({'error': 'Update not allowed'})
-
-    def create(self, request):
-        serialized = PostLikeSerializer(data=request.data)
-
-        if serialized.is_valid():
-            post = get_object_or_404(Post.objects.all(), pk=request.data['post'])
-            user = get_object_or_404(User.objects.all(), pk=request.data['user'])
-
-            PostLike.objects.create(like=request.data['like'], post=post, user=user)
-
-            return Response({"status": 'ok'})
-
-        return Response({'error': 'Operation not allowed'})
-
-    def delete(self, request, pk):
-        get_object_or_404(self.queryset, pk=pk).delete()
-        return Response({"status": 'ok'})
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 class NotApprovedView(APIView):
 

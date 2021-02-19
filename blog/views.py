@@ -113,12 +113,13 @@ def approve_post(request, pk):
         if request.POST['action'] == 'approve':
             post.approved = True
             messages.success(request, f'Approved "{post}"')
+            post.save()
 
             return redirect(reverse('blog:notapproved'))
 
         elif request.POST['action'] == 'enable':
             post.disabled = not post.disabled
-            messages.success(request, f'Enabled "{post}"')
+            messages.success(request, f'{"Disabled" if post.disabled else "Enabled" } "{post}"')
 
         post.save()
 

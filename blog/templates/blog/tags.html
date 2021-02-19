@@ -1,5 +1,4 @@
 <div id="tags" class="my-3">
-    <span class="badge text-dark"><a href="{% url 'blog:posts' %}" class="text-dark">#ALL</a></span>
     {% for tag in tags %}
     <span class="badge text-dark"><a href="{% url 'blog:tag' tag.pk %}" class="text-dark">#{{ tag.name }}</a></span>
     {% endfor %}

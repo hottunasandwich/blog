@@ -27,6 +27,7 @@
             </div>
         </div>
         <div class="col-lg-2">
+            <input id="search-tags" class="form-control me-2" type="search" placeholder="Search Tags" aria-label="Search">
             <div>{% include 'blog/tags.html' %}</div>
         </div>
     </div>
@@ -39,10 +40,25 @@
     }
 </style>
 <script>
+    var tag_list = []
     $('.post-card').hover(function (event) {
         $(this).removeClass('shadow').addClass('border')
     }, function (event) {
         $(this).removeClass('border').addClass('shadow')
+    })
+    $('#tags > span > a').each(function(index, elem){
+        tag_list.push(elem)
+    })
+    $('#search-tags').keyup(function(ev){
+        var search_list = []
+        for(var i=0;i<tag_list.length;i++){
+            if ($(tag_list[i]).text().indexOf(ev.target.value) > -1){
+                $(tag_list[i]).show()
+            } else {
+                $(tag_list[i]).hide()
+            }
+        }
+        console.log(search_list)
     })
 </script>
 {% endblock %}

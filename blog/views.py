@@ -27,7 +27,7 @@ class PostsView(generic.ListView):
     context_object_name = 'posts'
 
     def get_queryset(self):
-        if self.request.user.has_perms(Perms.editor_perms):
+        if self.request.user.has_perms([f'blog.{perm}' for perm in Perms.editor_perms]):
             return Post.objects.all()
 
         return Post.objects.filter(disabled=False, approved=True)

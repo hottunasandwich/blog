@@ -1,5 +1,5 @@
-<div id="tags" class="my-3">
+<div id="tags" class="d-flex flex-wrap my-3">
     {% for tag in tags %}
-    <span class="badge text-dark"><a href="{% url 'blog:tag' tag.pk %}" class="text-dark">#{{ tag.name }}</a></span>
+    <span class="text-muted bg-light text-dark"><a href="{% url 'blog:tag' tag.pk %}" class="text-dark">#{{ tag.name }}</a></span>
     {% endfor %}
 </div>

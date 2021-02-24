@@ -9,5 +9,6 @@ router.register('post/like', views.PostLikeViewSet)
 
 app_name = 'api'
 urlpatterns = router.urls + [
-    path('post/notapproved', views.NotApprovedView.as_view(), name='notapproved')
+    path('post/notapproved', views.NotApprovedView.as_view(), name='notapproved'),
+    path('search', views.SearchView.as_view(), name='search')
 ]

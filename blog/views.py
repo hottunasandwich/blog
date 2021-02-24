@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from users.management.commands.creategroups import Command as Perms
 from django.http import HttpResponse
-
+from django.contrib.postgres.search import SearchVector
 
 def get_category_list():
     cat_dict = {}
@@ -82,6 +82,8 @@ def post_create_view(request):
 
             post.save()
             create_form.save_m2m()
+
+            Post.objects.filter(pk=post.pk).update(search_vector=SearchVector('text'))
 
             messages.success(request, f'Created Post {post.title}')
 

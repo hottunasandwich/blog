@@ -1,15 +1,16 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, reverse
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from blog.models import CommentLike, PostLike
-from api.serializers import CommentLikeSerializer, PostLikeSerializer
+from api.serializers import *
 from rest_framework import mixins
 from blog.models import Post, Comment
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
+from django.contrib.postgres.search import SearchHeadline
 
 class CommentLikeViewSet(mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     """
@@ -63,3 +64,20 @@ class NotApprovedView(APIView):
 
     def get(self, request, format=None):
         return Response({'count': Post.objects.filter(approved=False).count()})
+
+class SearchView(APIView):
+    
+    def get(self, request, *args, **kwargs):
+        serialized = SearchSerializer(data=request.GET)
+
+        if serialized.is_valid():
+            search_posts = Post.objects.filter(search_vector=serialized.validated_data['s']).annotate(headline=SearchHeadline(
+                'text',
+                SearchQuery(serialized.validated_data['s']),
+            )).all()
+
+            if search_posts:
+                serialized_post = PostSerializer(search_posts, many=True)
+                return Response(serialized_post.data)
+        
+        return Response([])

@@ -4,8 +4,9 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import reverse
+from django.contrib.postgres.search import SearchVectorField
 
-fs = FileSystemStorage(location='media/img')
+fs = FileSystemStorage(location='media')
 
 class Post(models.Model):
     text = models.CharField('Text', max_length=9000)
@@ -17,6 +18,7 @@ class Post(models.Model):
     tag = models.ManyToManyField('Tag')
     disabled = models.BooleanField(default=False)
     approved = models.BooleanField(default=False)
+    search_vector = SearchVectorField(null=True, editable=False)
 
     def __str__(self):
         return self.title

@@ -43,7 +43,7 @@
         </span>
         <div> {{ post.create_date }}</div>
     </div>
-    <img src="/media/img/{{ post.img }}" alt="" width="100%">
+    <img src="/media/{{ post.img }}" alt="" width="100%">
     <div id="text" style="font-size: 20px;">
         <p>{{ post.text }}</p>
     </div>
@@ -140,7 +140,7 @@
             success: function(data){
                 callback()
             },
-            headers: {'X-CSRFToken': getCookie('csrftoken')}
+            headers: {'X-CSRFToken': getCookie('csrftoken')},
         })
     }
     function HandleLike(liked){

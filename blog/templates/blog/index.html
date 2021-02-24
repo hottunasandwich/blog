@@ -27,6 +27,15 @@
     {% block navbar %}
     <nav class="navbar navbar-expand-lg d-flex justify-content-between shadow-sm">
         <a class="navbar-brand text-dark" style="font-family: title;" href="{% url 'blog:posts' %}">Blog</a>
+        <form class="d-flex">
+            <div style="position: relative;" class="mx-2">
+                <input id="search-post" class="form-control" type="search" placeholder="Search Posts" aria-label="Search">
+                <div>
+                    <div id="search-result">
+                    </div>
+                </div>
+            </div>
+        </form>
         {% if request.user.is_authenticated %}
         <div>
             {% if 'blog.view_category' in perms %}
@@ -85,8 +94,31 @@
         .dropdown-toggle::after{
             content: none !important;
         }
+        #search-result{
+            background-color: white;
+            position: absolute;
+            top: 62px;
+            left: 0;
+            z-index: 2;
+        }
     </style>
     <script>
+        function ShowTheResults(data){
+            console.log(data)
+            $('.result-post').remove()            
+            if (data){
+                data.forEach(function(value, index){
+                    console.log('ex')
+                    $('#search-result').append(`<div onclick="GoToPage('${value.url}')" class="result-post" data-url="">
+                            <img src="${value.img}" alt="" width="50px">
+                            <span class="highlited-text">${value.headline}</span>
+                            <span class="created-date">${value.create_date}</span>
+                            <hr>
+                        </div>`)
+            })
+            }
+        }
+
         function check_footer_status() {
             if (document.getElementById('body').clientHeight + document.getElementById('footer').clientHeight > window.innerHeight) {
                 $('#footer').removeClass('footer-stick-bottom')
@@ -113,6 +145,24 @@
                 }
             })
         }
+        function SearchForPost(value){
+            $.ajax({
+                url: '{% url "api:search" %}',
+                data: {
+                    s: value
+                },
+                success: ShowTheResults
+
+            })
+        }
+
+        function GoToPage(url){
+            window.location = url
+        }
+
+        $('#search-post').keyup(function(ev){
+            SearchForPost(ev.target.value)
+        })
     </script>
     {% endblock %}
     {% block extra_script %}
